@@ -43,32 +43,26 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private Role createRoleIfNotExists(String roleName) {
-        // Используем Optional для безопасной проверки существования роли
         Optional<Role> existingRole = roleService.findByName(roleName);
-        if (existingRole.isPresent()) {
-            return existingRole.get();
-        }
-
-        Role newRole = new Role();
-        newRole.setName(roleName);
-        return roleService.save(newRole);
+        return existingRole.orElseGet(() -> {
+            Role newRole = new Role();
+            newRole.setName(roleName);
+            return roleService.save(newRole);
+        });
     }
 
     private void createUserIfNotExists(String email, String name,
                                        int age, String password,
                                        Set<Role> roles) {
         try {
-            // Пытаемся найти пользователя
             userService.findByEmail(email);
         } catch (RuntimeException e) {
-            // Если пользователь не найден - создаем нового
             User newUser = new User();
             newUser.setName(name);
             newUser.setAge(age);
             newUser.setEmail(email);
-            newUser.setPassword(password); // Пароль захешируется в UserService
+            newUser.setPassword(password);
             newUser.setRoles(roles);
-
             userService.save(newUser);
         }
     }
