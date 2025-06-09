@@ -24,40 +24,32 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return userRepository.findAll();
+        return userRepository.findAllWithRoles();
     }
 
     @Override
     @Transactional(readOnly = true)
     public User findById(Long id) {
-        return userRepository.findById(id)
+        return userRepository.findByIdWithRoles(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
     @Override
     public User save(User user) {
-        // Проверка на новый пользователь
         if (user.getId() == null) {
             if (user.getPassword() == null || user.getPassword().isEmpty()) {
                 throw new RuntimeException("Password is required for new user");
             }
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         } else {
-            // Обновление существующего пользователя
             User existingUser = findById(user.getId());
-
-            // Сохраняем старый пароль, если новый не указан
             if (user.getPassword() == null || user.getPassword().isEmpty()) {
                 user.setPassword(existingUser.getPassword());
-            } else {
-                // Хешируем новый пароль, если он изменился
-                if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
-                    user.setPassword(passwordEncoder.encode(user.getPassword()));
-                }
+            } else if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
             }
         }
 
-        // Управляем ролями
         Set<Role> managedRoles = new HashSet<>();
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {
             for (Role role : user.getRoles()) {
@@ -80,7 +72,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
+        return userRepository.findByEmailWithRoles(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 }
