@@ -19,11 +19,11 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Проверяем и создаем роли (если их нет)
+
         Role adminRole = createRoleIfNotExists("ROLE_ADMIN");
         Role userRole = createRoleIfNotExists("ROLE_USER");
 
-        // Создаем администратора (если еще не существует)
+
         createUserIfNotExists(
                 "admin@mail.com",
                 "Admin",
@@ -32,7 +32,7 @@ public class DataInitializer implements CommandLineRunner {
                 Set.of(adminRole, userRole)
         );
 
-        // Создаем обычного пользователя (если еще не существует)
+
         createUserIfNotExists(
                 "user@mail.com",
                 "User",
